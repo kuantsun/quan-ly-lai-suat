@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hệ Thống Quản Lý Nhắc Nợ & Lãi Suất</title>
+  
+  <!-- Nhúng Font chữ Inter từ Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
       --primary: #4f46e5;
@@ -11,68 +17,73 @@
       --success: #10b981;
       --danger: #ef4444;
       --warning: #f59e0b;
-      --bg: #f3f4f6;
+      --bg: #f8fafc;
       --card-bg: #ffffff;
-      --text: #1f2937;
-      --text-light: #6b7280;
-      --border: #e5e7eb;
+      --text: #0f172a;
+      --text-light: #64748b;
+      --border: #e2e8f0;
     }
 
-    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    * { 
+      box-sizing: border-box; 
+      /* Áp dụng font Inter cho toàn bộ trang */
+      font-family: 'Inter', sans-serif; 
+    }
     
-    body { background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; line-height: 1.6; }
+    body { background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; line-height: 1.6; font-size: 14px; }
     
-    .container { max-width: 1000px; margin: 0 auto; }
+    .container { max-width: 1050px; margin: 0 auto; }
     
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .header h1 { margin: 0; font-size: 24px; color: var(--text); }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .header h1 { margin: 0; font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
     
-    .dashboard-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
-    .summary-card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-left: 5px solid var(--primary); }
-    .summary-card h3 { margin: 0 0 10px 0; font-size: 14px; color: var(--text-light); text-transform: uppercase; }
-    .summary-card .value { font-size: 24px; font-weight: bold; margin: 0; }
+    .dashboard-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px; }
+    .summary-card { background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03); border-left: 5px solid var(--primary); transition: transform 0.2s ease; }
+    .summary-card:hover { transform: translateY(-2px); }
+    .summary-card h3 { margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+    .summary-card .value { font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.5px; }
     .summary-card.success { border-left-color: var(--success); }
     .summary-card.success .value { color: var(--success); }
     
-    .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
-    .card h2 { margin-top: 0; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
+    .card { background: var(--card-bg); padding: 25px; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03); margin-bottom: 25px; }
+    .card h2 { margin-top: 0; font-size: 17px; font-weight: 600; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 20px; color: var(--text); }
     
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
     .form-group { display: flex; flex-direction: column; }
-    .form-group label { font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--text-light); }
-    .form-group input { padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none; transition: 0.3s; }
-    .form-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+    .form-group label { font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text-light); }
+    .form-group input { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; transition: all 0.2s; color: var(--text); background: #f8fafc; }
+    .form-group input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); }
     
-    button { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-notify { background: #fff; border: 1px solid var(--primary); color: var(--primary); display: flex; align-items: center; gap: 8px;}
-    .btn-notify:hover { background: #f5f3ff; }
-    .btn-delete { background: #fee2e2; color: var(--danger); padding: 6px 12px; }
+    button { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 14px; transition: all 0.2s; }
+    .btn-primary { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2); }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-notify { background: #fff; border: 1px solid var(--border); color: var(--text); display: flex; align-items: center; gap: 8px; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .btn-notify:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .btn-delete { background: #fee2e2; color: var(--danger); padding: 6px 14px; border-radius: 6px; font-weight: 500; font-size: 13px; }
     .btn-delete:hover { background: #fecaca; }
     
-    .form-actions { margin-top: 15px; display: flex; justify-content: flex-end; }
+    .form-actions { margin-top: 20px; display: flex; justify-content: flex-end; }
     
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-    th, td { border-bottom: 1px solid var(--border); padding: 12px; text-align: left; }
-    th { color: var(--text-light); font-weight: 600; background: #f9fafb; }
-    tr:hover { background-color: #f9fafb; }
+    th, td { border-bottom: 1px solid var(--border); padding: 14px 12px; text-align: left; }
+    th { color: var(--text-light); font-weight: 500; background: #f8fafc; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+    tr:hover { background-color: #f8fafc; }
     
-    .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-    .badge-danger { background: #fee2e2; color: var(--danger); }
-    .badge-warning { background: #fef3c7; color: var(--warning); }
-    .badge-success { background: #d1fae5; color: var(--success); }
+    .badge { padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.2px; display: inline-block; }
+    .badge-danger { background: #fee2e2; color: #dc2626; }
+    .badge-warning { background: #fef3c7; color: #d97706; }
+    .badge-success { background: #d1fae5; color: #059669; }
     
-    .empty-state { text-align: center; padding: 30px; color: var(--text-light); }
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--text-light); font-size: 15px; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <div class="header">
-      <h1>Hệ Thống Quản Lý Nhắc Nợ</h1>
+      <h1>Hệ Thống Quản Lý Lãi Suất</h1>
       <button class="btn-notify" onclick="requestNotification()">
-        🔔 Bật thông báo
+        🔔 Nhận thông báo
       </button>
     </div>
 
@@ -87,7 +98,7 @@
         <p class="value" id="totalInterest">0 đ</p>
       </div>
       <div class="summary-card" style="border-left-color: var(--warning);">
-        <h3>Số Người Đang Vay</h3>
+        <h3>Số Hợp Đồng Hiện Tại</h3>
         <p class="value" id="totalPeople" style="color: var(--warning);">0</p>
       </div>
     </div>
@@ -120,7 +131,7 @@
 
     <!-- Danh Sách Quản Lý -->
     <div class="card" style="overflow-x: auto;">
-      <h2>Danh Sách Theo Dõi Lãi Suất</h2>
+      <h2>Danh Sách Theo Dõi</h2>
       <table>
         <thead>
           <tr>
@@ -138,7 +149,7 @@
         </tbody>
       </table>
       <div id="emptyState" class="empty-state" style="display: none;">
-        Chưa có dữ liệu người vay. Hãy thêm mới ở form phía trên.
+        Chưa có dữ liệu người vay. Hãy thêm hợp đồng mới ở form phía trên.
       </div>
     </div>
   </div>
@@ -146,7 +157,6 @@
   <script>
     let loans = JSON.parse(localStorage.getItem('myLoans')) || [];
 
-    // Format tiền tệ chuẩn Việt Nam
     const formatCurrency = (num) => {
       return num.toLocaleString('vi-VN') + ' đ';
     };
@@ -156,13 +166,13 @@
         Notification.requestPermission().then(permission => {
           if (permission === 'granted') {
             alert('Đã cấp quyền thông báo thành công!');
-            checkTodayReminders(true); // Bỏ qua check lịch sử để test
+            checkTodayReminders(true); 
           } else {
-            alert('Bạn đã từ chối quyền thông báo.');
+            alert('Bạn đã từ chối quyền thông báo. Hãy kiểm tra cài đặt trình duyệt.');
           }
         });
       } else {
-        alert('Trình duyệt của bạn không hỗ trợ tính năng này.');
+        alert('Trình duyệt của máy bạn không hỗ trợ tính năng này.');
       }
     }
 
@@ -230,15 +240,11 @@
 
       const today = new Date();
       const currentDay = today.getDate();
-      // Thuật toán: Lấy số ngày của tháng hiện tại (Xử lý tháng 2, các tháng 30 ngày)
       const daysInCurrentMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
 
-      // Sắp xếp ưu tiên: Đến hạn -> Quá hạn -> Sắp tới
       let sortedLoans = [...loans].sort((a, b) => a.payDay - b.payDay);
 
       sortedLoans.forEach(item => {
-        // Nếu ngày hẹn lớn hơn số ngày trong tháng (VD: hẹn ngày 31 nhưng tháng có 30 ngày)
-        // -> Ngày thu thực tế sẽ là ngày cuối cùng của tháng (ngày 30).
         let actualPayDay = item.payDay > daysInCurrentMonth ? daysInCurrentMonth : item.payDay;
         
         let statusHtml = '';
@@ -264,14 +270,12 @@
       });
     }
 
-    // Hàm kiểm tra nhắc nhở (Có cơ chế chống spam)
     function checkTodayReminders(forceNotify = false) {
       if (Notification.permission !== 'granted') return;
 
       const todayStr = new Date().toDateString();
       const lastNotified = localStorage.getItem('lastNotifiedDate');
 
-      // Đảm bảo chỉ thông báo 1 lần mỗi ngày trừ khi forceNotify = true
       if (lastNotified === todayStr && !forceNotify) return;
 
       const today = new Date();
@@ -285,7 +289,6 @@
         if (actualPayDay === currentDay) {
           new Notification('📢 Đến hạn thu tiền lãi!', {
             body: `Đến hạn thu ${formatCurrency(item.monthlyInterest)} từ ${item.name}.`,
-            icon: 'https://cdn-icons-png.flaticon.com/512/2953/2953363.png' // Icon minh họa
           });
           notifyCount++;
         }
@@ -303,13 +306,9 @@
       document.getElementById('payDay').value = '';
     }
 
-    // Khởi tạo ứng dụng
     updateDashboard();
     renderTable();
-    
-    // Tự động check khi vừa load trang
     setTimeout(() => checkTodayReminders(false), 2000); 
-
   </script>
 </body>
 </html>
