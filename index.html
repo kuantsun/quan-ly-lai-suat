@@ -3,41 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Loan & Interest Manager | Quản Lý Lãi Suất</title>
-  
-  <!-- Nhúng font chữ -->
+  <title>Quản Lý Lãi Suất</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Nhúng file CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Hiệu ứng Bong bóng nền -->
+  <!-- Hiệu ứng nền -->
   <div class="bubbles">
     <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
     <div class="bubble"></div><div class="bubble"></div>
   </div>
 
-  <!-- MÀN HÌNH ĐĂNG NHẬP -->
-  <div id="loginWrapper">
-    <div class="login-box glass-card">
-      <h2 data-i18n="loginTitle">🔑 Đăng Nhập</h2>
-      <div class="input-group" style="margin-bottom: 20px; text-align: left;">
-        <label data-i18n="username">Tài khoản</label>
-        <input type="text" id="loginUsername" placeholder="Nhập tài khoản" onkeypress="handleEnter(event)">
-      </div>
-      <div class="input-group" style="margin-bottom: 30px; text-align: left;">
-        <label data-i18n="password">Mật khẩu</label>
-        <input type="password" id="loginPassword" placeholder="Nhập mật khẩu" onkeypress="handleEnter(event)">
-      </div>
-      <button class="btn btn-primary" style="width: 100%;" onclick="checkLogin()" data-i18n="btnLogin">Đăng Nhập Quản Trị</button>
-    </div>
-  </div>
-
-  <!-- MÀN HÌNH QUẢN LÝ -->
+  <!-- Ứng dụng chính -->
   <div id="appContainer" class="container">
-    <div class="top-bar glass-card" style="padding: 20px 30px; display: flex; align-items: center; border-radius: 20px;">
+    
+    <div class="top-bar glass-card">
       <h1 data-i18n="appTitle">Quản Lý Lãi Suất</h1>
       <div class="actions-group">
         <div class="lang-switch">
@@ -45,7 +26,6 @@
           <button class="lang-btn" id="btn-en" onclick="setLang('en')">🇬🇧 EN</button>
         </div>
         <button class="btn btn-glass" onclick="requestNotification()">🔔 <span data-i18n="btnNotify">Bật Thông Báo</span></button>
-        <button class="btn btn-logout" onclick="logout()" data-i18n="btnLogout">Thoát</button>
       </div>
     </div>
 
@@ -113,7 +93,6 @@
     </div>
   </div>
 
-  <!-- Nhúng file JS ở cuối body để chạy sau khi HTML đã tải xong -->
   <script src="script.js"></script>
 </body>
 </html>
