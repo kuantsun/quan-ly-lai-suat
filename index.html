@@ -3,285 +3,427 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hệ Thống Quản Lý Nhắc Nợ & Lãi Suất</title>
+  <title>Loan & Interest Manager | Quản Lý Lãi Suất</title>
   
-  <!-- Nhúng Font chữ Inter từ Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font chữ hiện đại -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
+    /* =========================================
+       HIỆU ỨNG NỀN & BONG BÓNG (BACKGROUND & BUBBLES)
+       ========================================= */
     :root {
-      --primary: #4f46e5;
-      --primary-hover: #4338ca;
-      --success: #10b981;
+      --glass-bg: rgba(255, 255, 255, 0.15);
+      --glass-border: rgba(255, 255, 255, 0.3);
+      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+      --text-dark: #1e293b;
+      --text-light: #475569;
+      --primary: #6366f1;
       --danger: #ef4444;
+      --success: #10b981;
       --warning: #f59e0b;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --text-light: #64748b;
-      --border: #e2e8f0;
     }
 
-    * { 
-      box-sizing: border-box; 
-      font-family: 'Inter', sans-serif; 
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(45deg, #a8edea, #fed6e3, #e0c3fc, #8ec5fc);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: var(--text-dark);
+      overflow-x: hidden;
+      position: relative;
     }
-    
-    body { background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; line-height: 1.6; font-size: 14px; }
-    
-    /* Login Style */
-    .login-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 90vh;
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
-    .login-card {
-      width: 100%;
-      max-width: 400px;
+
+    /* Hiệu ứng bong bóng lơ lửng */
+    .bubbles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none;}
+    .bubble {
+      position: absolute; bottom: -100px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), rgba(255,255,255,0.2) 60%, rgba(255,255,255,0.05) 100%);
+      border-radius: 50%;
+      box-shadow: inset 0 0 20px rgba(255,255,255,0.5);
+      animation: float 10s infinite ease-in-out;
+    }
+    .bubble:nth-child(1) { width: 80px; height: 80px; left: 10%; animation-duration: 12s; }
+    .bubble:nth-child(2) { width: 150px; height: 150px; left: 30%; animation-duration: 15s; animation-delay: 2s; }
+    .bubble:nth-child(3) { width: 60px; height: 60px; left: 60%; animation-duration: 10s; animation-delay: 4s; }
+    .bubble:nth-child(4) { width: 120px; height: 120px; left: 80%; animation-duration: 18s; animation-delay: 1s; }
+    .bubble:nth-child(5) { width: 90px; height: 90px; left: 50%; animation-duration: 14s; animation-delay: 5s; }
+
+    @keyframes float {
+      0% { transform: translateY(0) scale(1); opacity: 0; }
+      20% { opacity: 0.8; }
+      80% { opacity: 0.5; }
+      100% { transform: translateY(-120vh) scale(1.5); opacity: 0; }
+    }
+
+    /* =========================================
+       GLASSMORPHISM UI THIẾT KẾ (KÍNH TRONG SUỐT)
+       ========================================= */
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      border-radius: 24px;
       padding: 30px;
-      background: var(--card-bg);
-      border-radius: 16px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    .login-card h2 {
-      text-align: center;
-      margin-top: 0;
-      margin-bottom: 25px;
-      color: var(--text);
-      font-size: 24px;
-      border: none;
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    /* Main App Style */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Bố cục trang */
+    .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+    
+    /* Login Screen */
+    #loginWrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .login-box { width: 100%; max-width: 400px; text-align: center; }
+    .login-box h2 { font-size: 28px; margin-bottom: 30px; font-weight: 600; color: #333; }
+
     #appContainer { display: none; } /* Ẩn đi lúc chưa đăng nhập */
-    .container { max-width: 1050px; margin: 0 auto; }
-    
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;}
-    .header h1 { margin: 0; font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
-    .header-actions { display: flex; gap: 10px; }
-    
-    .dashboard-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px; }
-    .summary-card { background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03); border-left: 5px solid var(--primary); transition: transform 0.2s ease; }
-    .summary-card:hover { transform: translateY(-2px); }
-    .summary-card h3 { margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
-    .summary-card .value { font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.5px; }
-    .summary-card.success { border-left-color: var(--success); }
-    .summary-card.success .value { color: var(--success); }
-    
-    .card { background: var(--card-bg); padding: 25px; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03); margin-bottom: 25px; }
-    .card h2 { margin-top: 0; font-size: 17px; font-weight: 600; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 20px; color: var(--text); }
-    
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-    .form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
-    .form-group label { font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text-light); }
-    .form-group input { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; transition: all 0.2s; color: var(--text); background: #f8fafc; width: 100%;}
-    .form-group input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); }
-    
-    button { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 14px; transition: all 0.2s; }
-    .btn-primary { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2); }
-    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
-    .btn-primary.full-width { width: 100%; padding: 12px; font-size: 15px; }
-    
-    .btn-notify { background: #fff; border: 1px solid var(--border); color: var(--text); display: flex; align-items: center; gap: 8px; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-    .btn-notify:hover { background: #f1f5f9; border-color: #cbd5e1; }
-    
-    .btn-logout { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
-    .btn-logout:hover { background: #fecaca; }
 
-    .btn-delete { background: #fee2e2; color: var(--danger); padding: 6px 14px; border-radius: 6px; font-weight: 500; font-size: 13px; }
-    .btn-delete:hover { background: #fecaca; }
+    /* Header & Ngôn Ngữ */
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
+    .top-bar h1 { font-size: 26px; font-weight: 700; color: #1e293b; text-shadow: 0 2px 10px rgba(255,255,255,0.5); }
+    .actions-group { display: flex; gap: 15px; align-items: center; }
     
-    .form-actions { margin-top: 5px; display: flex; justify-content: flex-end; }
+    /* Nút đổi ngôn ngữ */
+    .lang-switch {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 5px;
+      display: flex;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .lang-btn {
+      padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 14px;
+      transition: all 0.3s; border: none; background: transparent; cursor: pointer; color: #555;
+    }
+    .lang-btn.active { background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: var(--primary); }
+
+    /* Thống kê (Dashboard) */
+    .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-bottom: 30px; }
+    .stat-card {
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 20px; padding: 25px;
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: 0 8px 32px 0 rgba(0,0,0,0.05);
+      transition: transform 0.3s ease;
+    }
+    .stat-card:hover { transform: translateY(-5px); }
+    .stat-card h3 { font-size: 14px; color: var(--text-light); text-transform: uppercase; margin-bottom: 10px; font-weight: 600; }
+    .stat-card .val { font-size: 32px; font-weight: 700; color: var(--text-dark); }
+    .stat-card.c-success .val { color: var(--success); }
+    .stat-card.c-warning .val { color: var(--warning); }
+
+    /* Form & Inputs trong suốt */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+    .input-group { display: flex; flex-direction: column; }
+    .input-group label { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-dark); }
+    input {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 15px;
+      outline: none;
+      color: var(--text-dark);
+      transition: all 0.3s ease;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    input:focus {
+      background: rgba(255, 255, 255, 0.7);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+    }
+    input::placeholder { color: rgba(71, 85, 105, 0.6); }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 24px; border: none; border-radius: 12px; font-weight: 600; font-size: 15px;
+      cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #a855f7); color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6); transform: translateY(-2px); }
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255,255,255,0.8);
+      color: var(--text-dark); backdrop-filter: blur(5px);
+    }
+    .btn-glass:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-2px); }
+    .btn-logout { background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .btn-logout:hover { background: rgba(239, 68, 68, 0.25); }
+
+    /* Bảng dữ liệu */
+    .table-container { margin-top: 30px; overflow-x: auto; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+    th { padding: 15px; font-size: 13px; text-transform: uppercase; color: var(--text-light); border-bottom: 2px solid rgba(255,255,255,0.3); text-align: left; }
+    td { padding: 18px 15px; background: rgba(255, 255, 255, 0.35); transition: 0.3s; }
+    tr td:first-child { border-top-left-radius: 15px; border-bottom-left-radius: 15px; font-weight: 600; }
+    tr td:last-child { border-top-right-radius: 15px; border-bottom-right-radius: 15px; }
+    tr:hover td { background: rgba(255, 255, 255, 0.6); transform: scale(1.01); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+    /* Badges trạng thái */
+    .badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-danger { background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-warning { background: rgba(245, 158, 11, 0.2); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    .btn-delete { background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 8px 14px; border: none; border-radius: 10px; cursor: pointer; transition: 0.3s; font-weight: 600;}
+    .btn-delete:hover { background: rgba(239, 68, 68, 0.2); }
     
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-    th, td { border-bottom: 1px solid var(--border); padding: 14px 12px; text-align: left; }
-    th { color: var(--text-light); font-weight: 500; background: #f8fafc; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
-    tr:hover { background-color: #f8fafc; }
-    
-    .badge { padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.2px; display: inline-block; }
-    .badge-danger { background: #fee2e2; color: #dc2626; }
-    .badge-warning { background: #fef3c7; color: #d97706; }
-    .badge-success { background: #d1fae5; color: #059669; }
-    
-    .empty-state { text-align: center; padding: 40px 20px; color: var(--text-light); font-size: 15px; }
+    .empty-state { text-align: center; padding: 40px; color: var(--text-light); }
   </style>
 </head>
 <body>
 
+  <!-- Hiệu ứng Bong bóng nền -->
+  <div class="bubbles">
+    <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+    <div class="bubble"></div><div class="bubble"></div>
+  </div>
+
   <!-- MÀN HÌNH ĐĂNG NHẬP -->
-  <div id="loginWrapper" class="login-wrapper">
-    <div class="login-card">
-      <h2>🔑 Đăng Nhập</h2>
-      <div class="form-group">
-        <label>Tài khoản</label>
+  <div id="loginWrapper">
+    <div class="login-box glass-card">
+      <h2 data-i18n="loginTitle">🔑 Đăng Nhập</h2>
+      <div class="input-group" style="margin-bottom: 20px; text-align: left;">
+        <label data-i18n="username">Tài khoản</label>
         <input type="text" id="loginUsername" placeholder="Nhập tài khoản" onkeypress="handleEnter(event)">
       </div>
-      <div class="form-group">
-        <label>Mật khẩu</label>
+      <div class="input-group" style="margin-bottom: 30px; text-align: left;">
+        <label data-i18n="password">Mật khẩu</label>
         <input type="password" id="loginPassword" placeholder="Nhập mật khẩu" onkeypress="handleEnter(event)">
       </div>
-      <button class="btn-primary full-width" onclick="checkLogin()">Đăng Nhập Quản Trị</button>
+      <button class="btn btn-primary" style="width: 100%;" onclick="checkLogin()" data-i18n="btnLogin">Đăng Nhập Quản Trị</button>
     </div>
   </div>
 
-  <!-- MÀN HÌNH QUẢN LÝ (Ẩn khi chưa đăng nhập) -->
+  <!-- MÀN HÌNH QUẢN LÝ (ẨN KHI CHƯA ĐĂNG NHẬP) -->
   <div id="appContainer" class="container">
-    <div class="header">
-      <h1>Hệ Thống Quản Lý Lãi Suất</h1>
-      <div class="header-actions">
-        <button class="btn-notify" onclick="requestNotification()">🔔 Bật thông báo</button>
-        <button class="btn-logout" onclick="logout()">Thoát</button>
+    
+    <!-- Top Bar -->
+    <div class="top-bar glass-card" style="padding: 20px 30px; display: flex; align-items: center; border-radius: 20px;">
+      <h1 data-i18n="appTitle">Hệ Thống Quản Lý Lãi Suất</h1>
+      <div class="actions-group">
+        <!-- Nút chuyển ngôn ngữ -->
+        <div class="lang-switch">
+          <button class="lang-btn active" id="btn-vi" onclick="setLang('vi')">🇻🇳 VN</button>
+          <button class="lang-btn" id="btn-en" onclick="setLang('en')">🇬🇧 EN</button>
+        </div>
+        <button class="btn btn-glass" onclick="requestNotification()">🔔 <span data-i18n="btnNotify">Bật Thông Báo</span></button>
+        <button class="btn btn-logout" onclick="logout()" data-i18n="btnLogout">Thoát</button>
       </div>
     </div>
 
-    <!-- Bảng Tóm Tắt (Dashboard Summary) -->
-    <div class="dashboard-summary">
-      <div class="summary-card">
-        <h3>Tổng Tiền Cho Vay</h3>
-        <p class="value" id="totalPrincipal">0 đ</p>
+    <!-- Dashboard Thống Kê -->
+    <div class="dashboard">
+      <div class="stat-card">
+        <h3 data-i18n="statPrincipal">Tổng Tiền Cho Vay</h3>
+        <p class="val" id="totalPrincipal">0 đ</p>
       </div>
-      <div class="summary-card success">
-        <h3>Dự Kiến Lãi Thu Tháng Này</h3>
-        <p class="value" id="totalInterest">0 đ</p>
+      <div class="stat-card c-success">
+        <h3 data-i18n="statInterest">Dự Kiến Lãi Tháng Này</h3>
+        <p class="val" id="totalInterest">0 đ</p>
       </div>
-      <div class="summary-card" style="border-left-color: var(--warning);">
-        <h3>Số Hợp Đồng Hiện Tại</h3>
-        <p class="value" id="totalPeople" style="color: var(--warning);">0</p>
+      <div class="stat-card c-warning">
+        <h3 data-i18n="statPeople">Số Hợp Đồng</h3>
+        <p class="val" id="totalPeople">0</p>
       </div>
     </div>
 
-    <!-- Form Thêm Người Vay -->
-    <div class="card">
-      <h2>+ Thêm Hợp Đồng Mới</h2>
+    <!-- Form Thêm Mới -->
+    <div class="glass-card" style="margin-bottom: 30px;">
+      <h2 style="margin-bottom: 20px; font-size: 18px;" data-i18n="formTitle">+ Thêm Hợp Đồng Mới</h2>
       <div class="form-grid">
-        <div class="form-group" style="margin-bottom:0">
-          <label>Tên người vay</label>
-          <input type="text" id="name" placeholder="Ví dụ: Nguyễn Văn A">
+        <div class="input-group">
+          <label data-i18n="lbName">Tên người vay</label>
+          <input type="text" id="name" data-i18n-ph="phName">
         </div>
-        <div class="form-group" style="margin-bottom:0">
-          <label>Số tiền gốc (VNĐ)</label>
-          <input type="number" id="amount" placeholder="Ví dụ: 10000000">
+        <div class="input-group">
+          <label data-i18n="lbAmount">Số tiền gốc</label>
+          <input type="number" id="amount" data-i18n-ph="phAmount">
         </div>
-        <div class="form-group" style="margin-bottom:0">
-          <label>Lãi suất tháng (%)</label>
-          <input type="number" id="rate" placeholder="Ví dụ: 2.5" step="0.1">
+        <div class="input-group">
+          <label data-i18n="lbRate">Lãi suất tháng (%)</label>
+          <input type="number" id="rate" data-i18n-ph="phRate" step="0.1">
         </div>
-        <div class="form-group" style="margin-bottom:0">
-          <label>Ngày đóng lãi (1-31)</label>
-          <input type="number" id="payDay" placeholder="Ví dụ: 15" min="1" max="31">
+        <div class="input-group">
+          <label data-i18n="lbDay">Ngày đóng (1-31)</label>
+          <input type="number" id="payDay" data-i18n-ph="phDay" min="1" max="31">
         </div>
       </div>
-      <div class="form-actions">
-        <button class="btn-primary" onclick="addPerson()">Lưu Hợp Đồng</button>
+      <div style="margin-top: 25px; text-align: right;">
+        <button class="btn btn-primary" onclick="addPerson()" data-i18n="btnSave">Lưu Hợp Đồng</button>
       </div>
     </div>
 
-    <!-- Danh Sách Quản Lý -->
-    <div class="card" style="overflow-x: auto;">
-      <h2>Danh Sách Theo Dõi</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Họ Tên</th>
-            <th>Tiền Gốc</th>
-            <th>Lãi Suất</th>
-            <th>Tiền Lãi/Tháng</th>
-            <th>Ngày Thu</th>
-            <th>Trạng Thái</th>
-            <th>Thao Tác</th>
-          </tr>
-        </thead>
-        <tbody id="loanTable">
-          <!-- Render data here -->
-        </tbody>
-      </table>
-      <div id="emptyState" class="empty-state" style="display: none;">
-        Chưa có dữ liệu người vay. Hãy thêm hợp đồng mới ở form phía trên.
+    <!-- Danh sách quản lý -->
+    <div class="glass-card">
+      <h2 style="font-size: 18px;" data-i18n="tableTitle">Danh Sách Theo Dõi</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th data-i18n="thName">Họ Tên</th>
+              <th data-i18n="thPrincipal">Tiền Gốc</th>
+              <th data-i18n="thRate">Lãi Suất</th>
+              <th data-i18n="thInterest">Tiền Lãi/Tháng</th>
+              <th data-i18n="thDate">Ngày Thu</th>
+              <th data-i18n="thStatus">Trạng Thái</th>
+              <th data-i18n="thAction">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="loanTable"></tbody>
+        </table>
+        <div id="emptyState" class="empty-state" data-i18n="emptyState">
+          Chưa có dữ liệu. Hãy thêm hợp đồng mới.
+        </div>
       </div>
     </div>
+
   </div>
 
   <script>
-    // ==========================================
-    // PHẦN 1: XỬ LÝ ĐĂNG NHẬP
-    // ==========================================
-    
-    // Tự động kiểm tra xem đã đăng nhập trước đó chưa
-    if(sessionStorage.getItem('isLoggedIn') === 'true') {
-      showMainApp();
+    /* =========================================
+       TỪ ĐIỂN ĐA NGÔN NGỮ (I18N DICTIONARY)
+       ========================================= */
+    const dict = {
+      vi: {
+        loginTitle: "🔑 Đăng Nhập", username: "Tài khoản", password: "Mật khẩu", btnLogin: "Đăng Nhập Quản Trị",
+        appTitle: "Hệ Thống Quản Lý Lãi Suất", btnNotify: "Bật Thông Báo", btnLogout: "Thoát",
+        statPrincipal: "Tổng Vốn Cho Vay", statInterest: "Dự Kiến Lãi Tháng Này", statPeople: "Số Hợp Đồng Hiện Tại",
+        formTitle: "+ Thêm Hợp Đồng Mới", lbName: "Tên người vay", phName: "VD: Nguyễn Văn A",
+        lbAmount: "Số tiền gốc (VNĐ)", phAmount: "VD: 10000000", lbRate: "Lãi suất tháng (%)", phRate: "VD: 2.5",
+        lbDay: "Ngày đóng lãi (1-31)", phDay: "VD: 15", btnSave: "Lưu Hợp Đồng",
+        tableTitle: "Danh Sách Theo Dõi", thName: "Họ Tên", thPrincipal: "Tiền Gốc", thRate: "Lãi Suất",
+        thInterest: "Tiền Lãi/Tháng", thDate: "Ngày Thu", thStatus: "Trạng Thái", thAction: "Thao Tác",
+        emptyState: "Chưa có dữ liệu. Hãy thêm hợp đồng mới ở form phía trên.", btnDelete: "Xóa",
+        txtToday: "Hôm nay đến hạn!", txtOverdue: "Quá hạn", txtDays: "ngày", txtLeft: "Còn",
+        msgAlert: "Vui lòng nhập đúng và đầy đủ thông tin!", msgLoginFail: "Sai tài khoản hoặc mật khẩu!", msgDelete: "Xác nhận xóa hợp đồng này?"
+      },
+      en: {
+        loginTitle: "🔑 Login to Dashboard", username: "Username", password: "Password", btnLogin: "Login Securely",
+        appTitle: "Loan & Interest Manager", btnNotify: "Enable Alerts", btnLogout: "Logout",
+        statPrincipal: "Total Principal Lent", statInterest: "Expected Monthly Interest", statPeople: "Active Contracts",
+        formTitle: "+ Add New Contract", lbName: "Borrower Name", phName: "Ex: John Doe",
+        lbAmount: "Principal Amount", phAmount: "Ex: 10000", lbRate: "Monthly Rate (%)", phRate: "Ex: 2.5",
+        lbDay: "Repayment Day (1-31)", phDay: "Ex: 15", btnSave: "Save Contract",
+        tableTitle: "Tracking List", thName: "Name", thPrincipal: "Principal", thRate: "Rate",
+        thInterest: "Monthly Interest", thDate: "Due Date", thStatus: "Status", thAction: "Action",
+        emptyState: "No data available. Add a new contract above.", btnDelete: "Delete",
+        txtToday: "Due Today!", txtOverdue: "Overdue by", txtDays: "days", txtLeft: "In",
+        msgAlert: "Please fill in all fields correctly!", msgLoginFail: "Invalid username or password!", msgDelete: "Are you sure you want to delete this?"
+      }
+    };
+
+    let currentLang = localStorage.getItem('appLang') || 'vi';
+
+    // Hàm áp dụng ngôn ngữ lên Giao diện HTML
+    function applyLanguage() {
+      // Đổi chữ hiển thị
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[currentLang][key]) el.innerHTML = dict[currentLang][key];
+      });
+      // Đổi Placeholder trong input
+      document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+        const key = el.getAttribute('data-i18n-ph');
+        if (dict[currentLang][key]) el.placeholder = dict[currentLang][key];
+      });
+      
+      // Update nút đổi ngôn ngữ
+      document.getElementById('btn-vi').classList.toggle('active', currentLang === 'vi');
+      document.getElementById('btn-en').classList.toggle('active', currentLang === 'en');
+      
+      // Render lại bảng để đổi ngôn ngữ của các trạng thái
+      if (document.getElementById('appContainer').style.display === 'block') {
+        renderTable();
+      }
     }
 
-    // Cho phép ấn Enter để đăng nhập
-    function handleEnter(e) {
-      if(e.key === 'Enter') checkLogin();
+    function setLang(lang) {
+      currentLang = lang;
+      localStorage.setItem('appLang', lang);
+      applyLanguage();
     }
+
+    // Lấy chuỗi theo ngôn ngữ cho các Script JS
+    const t = (key) => dict[currentLang][key];
+
+    // ==========================================
+    // XỬ LÝ ĐĂNG NHẬP
+    // ==========================================
+    if(sessionStorage.getItem('isLoggedIn') === 'true') showMainApp();
+    
+    function handleEnter(e) { if(e.key === 'Enter') checkLogin(); }
 
     function checkLogin() {
       const u = document.getElementById('loginUsername').value;
       const p = document.getElementById('loginPassword').value;
-
       if(u === 'admin' && p === 'admin123') {
         sessionStorage.setItem('isLoggedIn', 'true');
-        document.getElementById('loginUsername').value = '';
-        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginUsername').value = ''; document.getElementById('loginPassword').value = '';
         showMainApp();
       } else {
-        alert('Tài khoản hoặc mật khẩu không chính xác!');
+        alert(t('msgLoginFail'));
       }
     }
 
     function showMainApp() {
       document.getElementById('loginWrapper').style.display = 'none';
       document.getElementById('appContainer').style.display = 'block';
-      
-      // Khởi chạy dữ liệu app
-      updateDashboard();
-      renderTable();
+      applyLanguage(); updateDashboard(); renderTable();
       setTimeout(() => checkTodayReminders(false), 2000);
     }
 
     function logout() {
-      if(confirm('Bạn muốn đăng xuất khỏi hệ thống?')) {
-        sessionStorage.removeItem('isLoggedIn');
-        document.getElementById('appContainer').style.display = 'none';
-        document.getElementById('loginWrapper').style.display = 'flex';
-      }
+      sessionStorage.removeItem('isLoggedIn');
+      document.getElementById('appContainer').style.display = 'none';
+      document.getElementById('loginWrapper').style.display = 'flex';
     }
 
     // ==========================================
-    // PHẦN 2: CHỨC NĂNG QUẢN LÝ LÃI SUẤT
+    // LOGIC ỨNG DỤNG LÕI
     // ==========================================
-    
     let loans = JSON.parse(localStorage.getItem('myLoans')) || [];
 
     const formatCurrency = (num) => {
-      return num.toLocaleString('vi-VN') + ' đ';
+      // Tự đổi hiển thị VNĐ hoặc Tiền tệ quốc tế theo ngôn ngữ
+      return currentLang === 'vi' 
+        ? num.toLocaleString('vi-VN') + ' đ'
+        : '$' + num.toLocaleString('en-US');
     };
 
     function requestNotification() {
       if ('Notification' in window) {
         Notification.requestPermission().then(permission => {
-          if (permission === 'granted') {
-            alert('Đã cấp quyền thông báo thành công!');
-            checkTodayReminders(true); 
-          } else {
-            alert('Bạn đã từ chối quyền thông báo. Hãy kiểm tra cài đặt trình duyệt.');
-          }
+          if (permission === 'granted') checkTodayReminders(true); 
+          else alert('Permission Denied.');
         });
-      } else {
-        alert('Trình duyệt của máy bạn không hỗ trợ tính năng này.');
       }
     }
 
     function updateDashboard() {
-      const totalPrincipal = loans.reduce((sum, loan) => sum + loan.amount, 0);
-      const totalInterest = loans.reduce((sum, loan) => sum + loan.monthlyInterest, 0);
-      
-      document.getElementById('totalPrincipal').textContent = formatCurrency(totalPrincipal);
-      document.getElementById('totalInterest').textContent = formatCurrency(totalInterest);
+      const totalP = loans.reduce((sum, l) => sum + l.amount, 0);
+      const totalI = loans.reduce((sum, l) => sum + l.monthlyInterest, 0);
+      document.getElementById('totalPrincipal').textContent = formatCurrency(totalP);
+      document.getElementById('totalInterest').textContent = formatCurrency(totalI);
       document.getElementById('totalPeople').textContent = loans.length;
     }
 
@@ -292,79 +434,56 @@
       const payDay = parseInt(document.getElementById('payDay').value);
 
       if (!name || isNaN(amount) || isNaN(rate) || isNaN(payDay) || payDay < 1 || payDay > 31) {
-        alert('Vui lòng nhập đúng và đầy đủ thông tin! (Ngày đóng lãi từ 1-31)');
-        return;
+        alert(t('msgAlert')); return;
       }
-
       const monthlyInterest = amount * (rate / 100);
-
-      const person = {
-        id: Date.now(),
-        name,
-        amount,
-        rate,
-        monthlyInterest,
-        payDay
-      };
-
-      loans.push(person);
-      saveData();
-      renderTable();
-      clearForm();
-      checkTodayReminders(false);
+      loans.push({ id: Date.now(), name, amount, rate, monthlyInterest, payDay });
+      saveData(); renderTable(); clearForm(); checkTodayReminders(false);
     }
 
     function deletePerson(id) {
-      if(confirm('Bạn có chắc chắn muốn xóa hợp đồng này?')) {
-        loans = loans.filter(item => item.id !== id);
-        saveData();
-        renderTable();
+      if(confirm(t('msgDelete'))) {
+        loans = loans.filter(i => i.id !== id); saveData(); renderTable();
       }
     }
 
-    function saveData() {
-      localStorage.setItem('myLoans', JSON.stringify(loans));
-      updateDashboard();
-    }
+    function saveData() { localStorage.setItem('myLoans', JSON.stringify(loans)); updateDashboard(); }
 
     function renderTable() {
       const tbody = document.getElementById('loanTable');
       const emptyState = document.getElementById('emptyState');
       tbody.innerHTML = '';
+      emptyState.style.display = loans.length === 0 ? 'block' : 'none';
 
-      if(loans.length === 0) {
-        emptyState.style.display = 'block';
-      } else {
-        emptyState.style.display = 'none';
-      }
-
-      const today = new Date();
-      const currentDay = today.getDate();
-      const daysInCurrentMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-
+      const today = new Date(); const currentDay = today.getDate();
+      const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+      
       let sortedLoans = [...loans].sort((a, b) => a.payDay - b.payDay);
 
       sortedLoans.forEach(item => {
-        let actualPayDay = item.payDay > daysInCurrentMonth ? daysInCurrentMonth : item.payDay;
-        
+        let actualPayDay = item.payDay > daysInMonth ? daysInMonth : item.payDay;
         let statusHtml = '';
+        
+        // Dịch thuật trạng thái ngày
         if (currentDay === actualPayDay) {
-          statusHtml = `<span class="badge badge-warning">Hôm nay đến hạn!</span>`;
+          statusHtml = `<span class="badge badge-warning">${t('txtToday')}</span>`;
         } else if (currentDay > actualPayDay) {
-          statusHtml = `<span class="badge badge-danger">Quá hạn ${currentDay - actualPayDay} ngày</span>`;
+          statusHtml = `<span class="badge badge-danger">${t('txtOverdue')} ${currentDay - actualPayDay} ${t('txtDays')}</span>`;
         } else {
-          statusHtml = `<span class="badge badge-success">Còn ${actualPayDay - currentDay} ngày</span>`;
+          statusHtml = `<span class="badge badge-success">${t('txtLeft')} ${actualPayDay - currentDay} ${t('txtDays')}</span>`;
         }
+
+        const dateStr = currentLang === 'vi' ? `Ngày ${actualPayDay}` : `Day ${actualPayDay}`;
 
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td><strong>${item.name}</strong></td>
+          <td>${item.name}</td>
           <td>${formatCurrency(item.amount)}</td>
           <td>${item.rate}%</td>
           <td style="color: var(--success); font-weight: 600;">${formatCurrency(item.monthlyInterest)}</td>
-          <td>Ngày ${actualPayDay}</td>
+          <td>${dateStr}</td>
           <td>${statusHtml}</td>
-          <td><button class="btn-delete" onclick="deletePerson(${item.id})">Xóa</button></td>
+          <td><button class="btn-delete" onclick="deletePerson(${item.id})">${t('btnDelete')}</button></td>
         `;
         tbody.appendChild(row);
       });
@@ -372,40 +491,31 @@
 
     function checkTodayReminders(forceNotify = false) {
       if (Notification.permission !== 'granted') return;
-
       const todayStr = new Date().toDateString();
-      const lastNotified = localStorage.getItem('lastNotifiedDate');
+      if (localStorage.getItem('lastNotifiedDate') === todayStr && !forceNotify) return;
 
-      if (lastNotified === todayStr && !forceNotify) return;
-
-      const today = new Date();
-      const currentDay = today.getDate();
-      const daysInCurrentMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-
+      const today = new Date(); const currentDay = today.getDate();
+      const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
       let notifyCount = 0;
 
       loans.forEach(item => {
-        let actualPayDay = item.payDay > daysInCurrentMonth ? daysInCurrentMonth : item.payDay;
+        let actualPayDay = item.payDay > daysInMonth ? daysInMonth : item.payDay;
         if (actualPayDay === currentDay) {
-          new Notification('📢 Đến hạn thu tiền lãi!', {
-            body: `Đến hạn thu ${formatCurrency(item.monthlyInterest)} từ ${item.name}.`,
+          new Notification(currentLang === 'vi' ? '📢 Đến hạn thu lãi!' : '📢 Interest Due!', {
+            body: `${item.name}: ${formatCurrency(item.monthlyInterest)}`
           });
           notifyCount++;
         }
       });
-
-      if (notifyCount > 0) {
-        localStorage.setItem('lastNotifiedDate', todayStr);
-      }
+      if (notifyCount > 0) localStorage.setItem('lastNotifiedDate', todayStr);
     }
 
     function clearForm() {
-      document.getElementById('name').value = '';
-      document.getElementById('amount').value = '';
-      document.getElementById('rate').value = '';
-      document.getElementById('payDay').value = '';
+      ['name', 'amount', 'rate', 'payDay'].forEach(id => document.getElementById(id).value = '');
     }
 
+    // Khởi tạo ban đầu
+    applyLanguage();
   </script>
 </body>
 </html>
