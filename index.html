@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý & Tính Lãi Suất Nhắc Nợ</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f9; padding: 20px; max-width: 800px; margin: auto; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    h2, h3 { color: #333; margin-top: 0; }
+    .form-group { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    input, button { padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+    input { flex: 1; min-width: 140px; }
+    button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
+    button:hover { background: #218838; }
+    .btn-notify { background: #007bff; margin-bottom: 15px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background: #f8f9fa; }
+    .btn-delete { background: #dc3545; padding: 5px 10px; font-size: 12px; color: white; border: none; border-radius: 3px; cursor: pointer; }
+    .alert-today { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Thêm Người Cần Tính Lãi</h2>
+    <button class="btn-notify" onclick="requestNotification()">🔔 Bật thông báo nhắc nhở</button>
+    
+    <div class="form-group">
+      <input type="text" id="name" placeholder="Tên người vay">
+      <input type="number" id="amount" placeholder="Số tiền gốc (VNĐ)">
+      <input type="number" id="rate" placeholder="Lãi suất tháng (%)" step="0.1">
+      <input type="number" id="payDay" placeholder="Ngày đóng lãi hằng tháng (1-31)" min="1" max="31">
+      <button onclick="addPerson()">Lưu Người Vay</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Danh Sách Đang Theo Dõi</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Họ Tên</th>
+          <th>Tiền Gốc</th>
+          <th>Lãi Suất</th>
+          <th>Lãi/Tháng</th>
+          <th>Ngày Nhắc</th>
+          <th>Thao Tác</th>
+        </tr>
+      </thead>
+      <tbody id="loanTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let loans = JSON.parse(localStorage.getItem('myLoans')) || [];
+
+    function requestNotification() {
+      if ('Notification' in window) {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            alert('Đã bật tính năng thông báo nhắc nợ thành công!');
+            checkTodayReminders();
+          } else {
+            alert('Bạn cần cấp quyền để nhận thông báo.');
+          }
+        });
+      }
+    }
+
+    function addPerson() {
+      const name = document.getElementById('name').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const rate = parseFloat(document.getElementById('rate').value);
+      const payDay = parseInt(document.getElementById('payDay').value);
+
+      if (!name || isNaN(amount) || isNaN(rate) || isNaN(payDay)) {
+        alert('Vui lòng nhập đầy đủ thông tin!');
+        return;
+      }
+
+      // Tính tiền lãi trực tiếp theo lãi suất tháng (%/tháng)
+      const monthlyInterest = amount * (rate / 100);
+
+      const person = {
+        id: Date.now(),
+        name,
+        amount,
+        rate,
+        monthlyInterest,
+        payDay
+      };
+
+      loans.push(person);
+      localStorage.setItem('myLoans', JSON.stringify(loans));
+      renderTable();
+      clearForm();
+      checkTodayReminders();
+    }
+
+    function deletePerson(id) {
+      loans = loans.filter(item => item.id !== id);
+      localStorage.setItem('myLoans', JSON.stringify(loans));
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('loanTable');
+      tbody.innerHTML = '';
+      const today = new Date().getDate();
+
+      loans.forEach(item => {
+        const isToday = item.payDay === today;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><b>${item.name}</b></td>
+          <td>${item.amount.toLocaleString('vi-VN')} VNĐ</td>
+          <td>${item.rate}% / tháng</td>
+          <td><span style="color: green; font-weight: bold;">${item.monthlyInterest.toLocaleString('vi-VN')} VNĐ</span></td>
+          <td>Mỗi ngày ${item.payDay} ${isToday ? '<span class="alert-today">(Hôm nay!)</span>' : ''}</td>
+          <td><button class="btn-delete" onclick="deletePerson(${item.id})">Xóa</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function checkTodayReminders() {
+      const today = new Date().getDate();
+      loans.forEach(item => {
+        if (item.payDay === today && Notification.permission === 'granted') {
+          new Notification('📢 Nhắc lịch thu lãi!', {
+            body: `Hôm nay (ngày ${today}) đến kỳ thu ${item.monthlyInterest.toLocaleString('vi-VN')} VNĐ từ ${item.name}.`,
+          });
+        }
+      });
+    }
+
+    function clearForm() {
+      document.getElementById('name').value = '';
+      document.getElementById('amount').value = '';
+      document.getElementById('rate').value = '';
+      document.getElementById('payDay').value = '';
+    }
+
+    renderTable();
+    checkTodayReminders();
+  </script>
+</body>
+</html>
