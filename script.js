@@ -1,3 +1,6 @@
+/* =========================================
+   1. TỪ ĐIỂN ĐA NGÔN NGỮ
+   ========================================= */
 const dict = {
   vi: {
     loginTitle: "🔑 Đăng Nhập", username: "Tài khoản", password: "Mật khẩu", btnLogin: "Đăng Nhập Quản Trị",
@@ -5,7 +8,7 @@ const dict = {
     statPrincipal: "Tổng Vốn Cho Vay", statInterest: "Dự Kiến Lãi Tháng Này", statPeople: "Số Hợp Đồng Hiện Tại",
     formTitle: "+ Thêm Hợp Đồng Mới", lbName: "Tên người vay", phName: "VD: Nguyễn Văn A",
     lbAmount: "Số tiền gốc (VNĐ)", phAmount: "VD: 10,000,000", lbRate: "Lãi suất tháng (%)", phRate: "VD: 2.5",
-    lbDay: "Ngày đóng lãi (1-31)", phDay: "VD: 15", btnSave: "Lưu Hợp Đồng",
+    lbDay: "Ngày đóng (1-31)", phDay: "VD: 15", btnSave: "Lưu Hợp Đồng",
     tableTitle: "Danh Sách Theo Dõi", thName: "Họ Tên", thPrincipal: "Tiền Gốc", thRate: "Lãi Suất",
     thInterest: "Tiền Lãi/Tháng", thDate: "Ngày Thu", thStatus: "Trạng Thái", thAction: "Thao Tác",
     emptyState: "Chưa có dữ liệu. Hãy thêm hợp đồng mới ở form phía trên.", btnDelete: "Xóa",
@@ -29,6 +32,14 @@ const dict = {
 
 let currentLang = localStorage.getItem('appLang') || 'vi';
 
+/* =========================================
+   2. KHỞI TẠO DỮ LIỆU (QUAN TRỌNG: PHẢI NẰM TRÊN CÙNG)
+   ========================================= */
+let loans = JSON.parse(localStorage.getItem('myLoans')) || [];
+
+/* =========================================
+   3. CÁC HÀM TIỆN ÍCH & NGÔN NGỮ
+   ========================================= */
 function applyLanguage() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
@@ -54,8 +65,13 @@ function formatMoneyInput(input) {
   else input.value = '';
 }
 
-if(sessionStorage.getItem('isLoggedIn') === 'true') showMainApp();
+const formatCurrency = (num) => {
+  return currentLang === 'vi' ? num.toLocaleString('vi-VN') + ' đ' : '$' + num.toLocaleString('en-US');
+};
 
+/* =========================================
+   4. LOGIC ĐĂNG NHẬP & GIAO DIỆN CHÍNH
+   ========================================= */
 function handleEnter(e) { if(e.key === 'Enter') checkLogin(); }
 
 function checkLogin() {
@@ -81,12 +97,9 @@ function logout() {
   document.getElementById('loginWrapper').style.display = 'flex';
 }
 
-let loans = JSON.parse(localStorage.getItem('myLoans')) || [];
-
-const formatCurrency = (num) => {
-  return currentLang === 'vi' ? num.toLocaleString('vi-VN') + ' đ' : '$' + num.toLocaleString('en-US');
-};
-
+/* =========================================
+   5. LOGIC QUẢN LÝ LÃI SUẤT
+   ========================================= */
 function requestNotification() {
   if ('Notification' in window) {
     Notification.requestPermission().then(p => {
@@ -124,7 +137,10 @@ function deletePerson(id) {
   if(confirm(t('msgDelete'))) { loans = loans.filter(i => i.id !== id); saveData(); renderTable(); }
 }
 
-function saveData() { localStorage.setItem('myLoans', JSON.stringify(loans)); updateDashboard(); }
+function saveData() { 
+  localStorage.setItem('myLoans', JSON.stringify(loans)); 
+  updateDashboard(); 
+}
 
 function renderTable() {
   const tbody = document.getElementById('loanTable');
@@ -190,5 +206,10 @@ function clearForm() {
   ['name', 'amount', 'rate', 'payDay'].forEach(id => document.getElementById(id).value = '');
 }
 
-// Khởi chạy
+/* =========================================
+   6. KHỞI CHẠY (TỰ ĐỘNG CHẠY KHI VỪA MỞ TRANG)
+   ========================================= */
 applyLanguage();
+if(sessionStorage.getItem('isLoggedIn') === 'true') {
+  showMainApp();
+}
